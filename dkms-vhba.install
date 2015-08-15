@@ -1,0 +1,22 @@
+#/bin/sh
+
+# arg 1:  the new package version
+# arg 2:  the old package version
+
+post_install() {
+  getent group cdemu &>/dev/null || groupadd -r cdemu
+  dkms install vhba/${1%-*}
+}
+
+pre_upgrade() {
+  pre_remove "$2"
+}
+
+post_upgrade() {
+  post_install "$1"
+}
+
+pre_remove() {
+  groupdel cdemu
+  [ -n "${1%-*}" ] && dkms remove vhba/${1%-*} --all || true
+}
